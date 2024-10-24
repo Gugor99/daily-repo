@@ -1,0 +1,82 @@
+name: Custom Scheduled Push
+
+on:
+  schedule:
+    # Run at 00:00 UTC every day
+    - cron: '0 0 * * *'
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Set up Git configuration
+      - name: Set up Git
+        run: |
+          git config --global user.email "gabrielecanova99@gmail.com"
+          git config --global user.name "Gugor99"
+
+      # Get the current day of the week (1=Monday, 7=Sunday)
+      - name: Get current day of the week
+        run: echo "DAY_OF_WEEK=$(date +%u)" >> $GITHUB_ENV
+
+      # Get the current week number (cycle between 1 and 24 weeks)
+      - name: Get current week number
+        id: week
+        run: echo "WEEK_NUMBER=$(( ($(date +%s) / 604800) % 24 + 1 ))" >> $GITHUB_ENV
+
+      # Determine if today is a commit day based on the custom schedule
+      - name: Check commit schedule
+        id: schedule
+        run: |
+          # Define the custom schedule for each week
+          # Use days of the week (1=Monday, 7=Sunday) for each week
+          SCHEDULE=(
+            "7"
+            "1 2 3 4 5 6"    
+            "3 7"                
+            "1 2 3 4 5 6"    
+            "5"                 
+            "1 2 3 4 5 6"    
+            "7"                 
+            "1 2 3 4 5 6 7"    
+            "3"              
+            "1 2 4 5 6"
+            "7"
+            "1 2 3 4 5 6 7"
+            "3 6 7"
+            "6"
+            ""
+            "7"
+            "1 2 3 4 5 6"
+            "1"
+            "2"
+            "1 7"
+            "1 2 3 4 5 6"
+            "7"
+            "1 2 3 4 5 6 7"
+            "3 6 7"
+            "6"        
+            # Add more weeks up to week 24 as needed...
+          )
+
+          # Get current week's schedule
+          WEEK_SCHEDULE="${SCHEDULE[$(($WEEK_NUMBER - 1))]}"
+
+          # Check if today is a commit day
+          if [[ "$WEEK_SCHEDULE" =~ $DAY_OF_WEEK ]]; then
+            echo "COMMIT=true" >> $GITHUB_ENV
+          else
+            echo "COMMIT=false" >> $GITHUB_ENV
+          fi
+
+      # Commit and push if today is a commit day
+      - name: Make a commit
+        if: env.COMMIT == 'true'
+        run: |
+          git commit --allow-empty -m "Scheduled commit for week ${{ steps.week.outputs.WEEK_NUMBER }} on day ${{ env.DAY_OF_WEEK }}"
+          git push
+ 
