@@ -76,4 +76,5 @@ jobs:
         run: |
           git commit --allow-empty -m "Scheduled commit for week ${{ steps.week.outputs.WEEK_NUMBER }} on day ${{ env.DAY_OF_WEEK }}"
           git push
- 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
