@@ -72,7 +72,8 @@ jobs:
 
       # Commit and push if today is a commit day
       - name: Make a commit
-	run: |
+        # Temporarily removed the if condition to force commit
+        run: |
           echo "Commit should be made today"
           git commit --allow-empty -m "Scheduled commit for week ${{ steps.week.outputs.WEEK_NUMBER }} on day ${{ env.DAY_OF_WEEK }}"
           git push
