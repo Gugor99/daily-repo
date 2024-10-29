@@ -2,7 +2,7 @@ name: Custom Scheduled Push
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # Daily check at midnight
 
 jobs:
   commit:
@@ -26,22 +26,19 @@ jobs:
         id: week
         run: echo "WEEK_NUMBER=$(( ($(date +%s) / 604800) % 25 + 1 ))" >> $GITHUB_ENV
 
-      # Determine if today is a commit day based on the custom schedule
+      # Check commit schedule
       - name: Check commit schedule
         id: schedule
         run: |
-          # Define the custom schedule for each week
-          # Use days of the week (1=Monday, 7=Sunday) for each week
           SCHEDULE=(
+            "1 2 3 4 5 6"
+            "3 7"
+            "1 2 3 4 5 6"
+            "5"
+            "1 2 3 4 5 6"
             "7"
-            "1 2 3 4 5 6"    
-            "3 7"                
-            "1 2 3 4 5 6"    
-            "5"                 
-            "1 2 3 4 5 6"    
-            "7"                 
-            "1 2 3 4 5 6 7"    
-            "3"              
+            "1 2 3 4 5 6 7"
+            "3"
             "1 2 4 5 6"
             "7"
             "1 2 3 4 5 6 7"
@@ -57,13 +54,10 @@ jobs:
             "7"
             "1 2 3 4 5 6 7"
             "3 6 7"
-            "6"        
+            "6"
+            "7"		
           )
-
-          # Get current week's schedule
           WEEK_SCHEDULE="${SCHEDULE[$(($WEEK_NUMBER - 1))]}"
-
-          # Check if today is a commit day
           if [[ "$WEEK_SCHEDULE" =~ $DAY_OF_WEEK ]]; then
             echo "COMMIT=true" >> $GITHUB_ENV
           else
@@ -72,9 +66,8 @@ jobs:
 
       # Commit and push if today is a commit day
       - name: Make a commit
-        # if: env.COMMIT == 'true'
-	run: |
-          echo "Commit should be made today"
+        if: env.COMMIT == 'true'
+        run: |
           git commit --allow-empty -m "Scheduled commit for week ${{ steps.week.outputs.WEEK_NUMBER }} on day ${{ env.DAY_OF_WEEK }}"
           git push
         env:
