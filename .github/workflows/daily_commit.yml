@@ -2,7 +2,7 @@ name: Custom Scheduled Push
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily check at midnight
+    - cron: '0 0 * * *'
 
 jobs:
   commit:
@@ -21,44 +21,51 @@ jobs:
       - name: Get current day of the week
         run: echo "DAY_OF_WEEK=$(date +%u)" >> $GITHUB_ENV
 
-      # Get the current week number (cycle between 1 and 25 weeks)
+      # Get the custom week number, cycling every 25 weeks from the publication date (2024-10-24)
       - name: Get current week number
         id: week
-        run: echo "WEEK_NUMBER=$(( ($(date +%s) / 604800) % 25 + 1 ))" >> $GITHUB_ENV
+        run: |
+          PUB_DATE=$(date -d "2024-10-24" +%s)
+          CURRENT_DATE=$(date +%s)
+          WEEK_NUMBER=$(( ((CURRENT_DATE - PUB_DATE) / 604800 % 25) + 1 ))
+          echo "WEEK_NUMBER=$WEEK_NUMBER" >> $GITHUB_ENV
 
-      # Check commit schedule
+      # Determine if today is a commit day based on the custom schedule
       - name: Check commit schedule
         id: schedule
         run: |
+          # Define the custom schedule for each week
+          # Use days of the week (1=Monday, 7=Sunday) for each week
           SCHEDULE=(
-            "1 2 3 4 5 6"
-            "3 7"
-            "1 2 3 4 5 6"
-            "5"
-            "1 2 3 4 5 6"
-            "7"
-            "1 2 3 4 5 6 7"
-            "3"
-            "1 2 4 5 6"
-            "7"
-            "1 2 3 4 5 6 7"
-            "3 6 7"
-            "6"
-            ""
-            "7"
-            "1 2 3 4 5 6"
-            "1"
-            "2"
-            "1 7"
-            "1 2 3 4 5 6"
-            "7"
-            "1 2 3 4 5 6 7"
-            "3 6 7"
-            "6"
-            ""
-            "7"
+            "7"                     # Week 1: Sunday
+            "1 2 3 4 5 6"           # Week 2: Monday to Saturday
+            "3 7"                   # Week 3: Tuesday and Sunday
+            "1 2 3 4 5 6"           # Week 4: Monday to Saturday
+            "5"                     # Week 5: Thursday
+            "1 2 3 4 5 6"           # Week 6: Monday to Saturday
+            "7"                     # Week 7: Sunday
+            "1 2 3 4 5 6 7"         # Week 8: Every day
+            "3"                     # Week 9: Tuesday
+            "1 2 4 5 6"             # Week 10: Mon, Tue, Thu, Fri, Sat
+            "7"                     # Week 11: Sunday
+            "1 2 3 4 5 6 7"         # Week 12: Every day
+            "3 6 7"                 # Week 13: Tue, Sat, Sun
+            "6"                     # Week 14: Saturday
+            ""                      # Week 15: No commit days
+            "7"                     # Week 16: Sunday
+            "1 2 3 4 5 6"           # Week 17: Monday to Saturday
+            "1"                     # Week 18: Monday
+            "2"                     # Week 19: Tuesday
+            "1 7"                   # Week 20: Monday and Sunday
+            "1 2 3 4 5 6"           # Week 21: Monday to Saturday
+            "7"                     # Week 22: Sunday
+            "1 2 3 4 5 6 7"         # Week 23: Every day
+            "3 6 7"                 # Week 24: Tue, Sat, Sun
+            "6"                     # Week 25: Saturday
           )
+          # Get current week's schedule
           WEEK_SCHEDULE="${SCHEDULE[$(($WEEK_NUMBER - 1))]}"
+          # Check if today is a commit day
           if [[ "$WEEK_SCHEDULE" =~ $DAY_OF_WEEK ]]; then
             echo "COMMIT=true" >> $GITHUB_ENV
           else
