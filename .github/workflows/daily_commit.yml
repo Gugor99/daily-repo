@@ -25,7 +25,7 @@ jobs:
       - name: Get current week number
         id: week
         run: |
-          PUB_DATE=$(date -d "2024-10-24" +%s)
+          PUB_DATE=$(date -d "2024-10-21" +%s)
           CURRENT_DATE=$(date +%s)
           WEEK_NUMBER=$(( ((CURRENT_DATE - PUB_DATE) / 604800 % 25) + 1 ))
           echo "WEEK_NUMBER=$WEEK_NUMBER" >> $GITHUB_ENV
