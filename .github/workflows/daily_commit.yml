@@ -27,7 +27,7 @@ jobs:
         run: |
           PUB_DATE=$(date -d "2024-10-21" +%s)
           CURRENT_DATE=$(date +%s)
-          WEEK_NUMBER=$(( ((CURRENT_DATE - PUB_DATE) / 604800 % 25) + 1 ))
+          WEEK_NUMBER=$(( ((CURRENT_DATE - PUB_DATE) / 604800 % 28) + 1 ))
           echo "WEEK_NUMBER=$WEEK_NUMBER" >> $GITHUB_ENV
 
       # Determine if today is a commit day based on the custom schedule
@@ -41,8 +41,8 @@ jobs:
             "1 2 3 4 5 6"           # Week 2: Monday to Saturday
             "3 7"                   # Week 3: Tuesday and Sunday
             "1 2 3 4 5 6"           # Week 4: Monday to Saturday
-            "5"                     # Week 5: Thursday
-            "1 2 3 4 5 6"           # Week 6: Monday to Saturday
+            "7"                     # Week 5: Thursday
+            "2 3 4 5 6"             # Week 6: Tuesday to Saturday
             "7"                     # Week 7: Sunday
             "1 2 3 4 5 6 7"         # Week 8: Every day
             "3"                     # Week 9: Tuesday
@@ -62,6 +62,9 @@ jobs:
             "1 2 3 4 5 6 7"         # Week 23: Every day
             "3 6 7"                 # Week 24: Tue, Sat, Sun
             "6"                     # Week 25: Saturday
+            "3"                     # Week 26: Wednesday
+            "3"                     # Week 27: Wednesday
+            ""                      # Week 28: No commit days
           )
           # Get current week's schedule
           WEEK_SCHEDULE="${SCHEDULE[$(($WEEK_NUMBER - 1))]}"
